@@ -27,19 +27,29 @@ class LinebotController < ApplicationController
           place = event.message['text'] #ここでLINEで送った文章を取得
           api_key= Rails.application.credentials[:API_KEY]
           result = "https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid=#{api_key}&takeout=1&adress=#{place}"
+
           # result = `curl -X GET https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid='&'format=json'&'address=#{place}`#ここでぐるなびAPIを叩く
         else
           latitude = event.message['latitude']
           longitude = event.message['longitude']
 
           api_key= Rails.application.credentials[:API_KEY]
-          result = "https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid=#{api_key}&takeout=1&latitude=#{latitude}&longitude=#{longitude}"
+          search_url = "https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid=#{api_key}&takeout=1&latitude=#{latitude}&longitude=#{longitude}"
+
           # result = `curl -X GET https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid='&'format=json'&'latitude=#{latitude}'&'longitude=#{longitude}`#ここでぐるなびAPIを叩く
         end
+
+        search_url = URI.encode(search_url) #エスケープ
+        search_uri = URI.parse(search_url)
+        json = Net::HTTP.get(search_uri)
+        result = JSON.parse(json)
+        #配列の形で検索結果が@restsに格納される
+        @rests = result["rest"]
+        @restaurant = @rests.take(5)
  
-        hash_result = JSON.parse result #レスポンスが文字列なのでhashにパースする
-        shops = hash_result["rest"] #ここでお店情報が入った配列となる
-        shop = shops.sample #任意のものを一個選ぶ
+        # hash_result = JSON.parse result #レスポンスが文字列なのでhashにパースする
+        # shops = hash_result["rest"] #ここでお店情報が入った配列となる
+        # shop = shops.sample #任意のものを一個選ぶ
  
         #店の情報
         url = shop["url_mobile"] #サイトのURLを送る
