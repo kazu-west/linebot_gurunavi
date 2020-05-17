@@ -25,12 +25,16 @@ class LinebotController < ApplicationController
       events.each { |event|
         if event.message['text'] != nil
           place = event.message['text'] #ここでLINEで送った文章を取得
-          result = `curl -X GET https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid='&'format=json'&'address=#{place}`#ここでぐるなびAPIを叩く
+          api_key= Rails.application.credentials[:API_KEY]
+          result = "https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid=#{api_key}&takeout=1&adress=#{place}"
+          # result = `curl -X GET https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid='&'format=json'&'address=#{place}`#ここでぐるなびAPIを叩く
         else
           latitude = event.message['latitude']
           longitude = event.message['longitude']
- 
-          result = `curl -X GET https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid='&'format=json'&'latitude=#{latitude}'&'longitude=#{longitude}`#ここでぐるなびAPIを叩く
+
+          api_key= Rails.application.credentials[:API_KEY]
+          result = "https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid=#{api_key}&takeout=1&latitude=#{latitude}&longitude=#{longitude}"
+          # result = `curl -X GET https://api.gnavi.co.jp/RestSearchAPI/v3/?keyid='&'format=json'&'latitude=#{latitude}'&'longitude=#{longitude}`#ここでぐるなびAPIを叩く
         end
  
         hash_result = JSON.parse result #レスポンスが文字列なのでhashにパースする
